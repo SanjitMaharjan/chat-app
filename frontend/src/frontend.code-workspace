@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../backend"
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"Toastify"
+		]
+	}
+}
