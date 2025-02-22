@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
+import { compare, encrypt } from "../../algorithms/rsa.js";
 
 export const signup = async (req, res) => {
     const { fullName, email, password } = req.body;
@@ -19,8 +20,7 @@ export const signup = async (req, res) => {
 
         if (user) return res.status(400).json({ message: "User already exists" });
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = encrypt(password);
 
         const newUser = new User({
             fullName, email, password: hashedPassword
@@ -57,8 +57,9 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: "Invalid Credentials" });
         }
-
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        
+        const isPasswordCorrect = compare(user.password, password);
+        // return res.status(400).json({message: isPasswordCorrect});
         if (!isPasswordCorrect) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
