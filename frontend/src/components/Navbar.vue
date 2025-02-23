@@ -17,13 +17,18 @@
                         <span class="hidden sm:inline">Settings</span>
                     </RouterLink> -->
 
-                    <template v-if="authUser">
+                    <template v-if="authStore.authUser">
                         <!-- <RouterLink to="/settings" class="btn btn-sm gap-2 transition-colors">
                             <User class="size-4" />
                             <span class="hidden sm:inline">Profile</span>
                         </RouterLink> -->
+
+                        <p class="flex items-center gap-2">
+                            <img :src="`https://i.pravatar.cc/150?u=${authStore.authUser?._id}`" class="rounded-full size-10" />
+                            {{ authStore.authUser?.fullName }}
+                        </p>
     
-                        <button class="flex items-center gap-2" @click="logout">
+                        <button class="flex items-center gap-2" @click="authStore.logout">
                             <LogOut class="size-4" />
                             <span class="hidden sm:inline">Logout</span>
                         </button>
@@ -35,10 +40,10 @@
 </template>
 
 <script lang="ts" setup>
-import { LogOut, MessageSquare, User } from 'lucide-vue-next';
+import { LogOut, MessageSquare } from 'lucide-vue-next';
 import { useAuthStore } from '../store/useAuthStore';
 
 
-const {logout, authUser} = useAuthStore();
+const authStore = useAuthStore();
 
 </script>

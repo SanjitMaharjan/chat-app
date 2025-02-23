@@ -1,6 +1,8 @@
 import cloudinary from "../lib/cloudinary.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 import Message from "../models/message.model.js";
 import User from "../models/user.model.js";
+import { encrypt, decrypt } from "../../algorithms/aes.js";
 
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -26,6 +28,13 @@ export const getMessages = async (req, res) => {
             ]
         })
 
+        messages.map(message => {
+            console.log(message.text);
+            message.text = decrypt(message.text);
+            console.log(message.text);
+            return message;
+        });
+
         res.status(200).json(messages);
     }
     catch (error) {
@@ -40,7 +49,6 @@ export const sendMessage = async (req, res) => {
         const { id: recipientId } = req.params;
         const currentUserId = req.user._id;
 
-
         let imageUrl;
         if (image) {
             const uploadResponse = await cloudinary.uploader.upload(image);
@@ -50,13 +58,18 @@ export const sendMessage = async (req, res) => {
         const newMessage = new Message({
             senderId: currentUserId,
             receiverId: recipientId,
-            text,
+            text: encrypt(text),
             image: imageUrl
         });
 
         await newMessage.save();
 
-        // todo: realtime functionality goes here => socket.io
+        const receiverSocketId = getReceiverSocketId(recipientId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
+
+        newMessage.text = decrypt(newMessage.text);
 
         res.status(201).json(newMessage);
     } catch (error) {

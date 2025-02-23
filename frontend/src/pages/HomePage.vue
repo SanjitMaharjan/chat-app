@@ -6,7 +6,7 @@
       >
         <div class="flex h-full rounded-lg overflow-hidden">
           <Sidebar />
-          <NoChatSelected v-if="!selectedUser" />
+          <NoChatSelected v-if="!chatStore.selectedUser" />
           <ChatContainer v-else />
         </div>
       </div>
@@ -20,5 +20,5 @@ import NoChatSelected from "../components/NoChatSelected.vue";
 import Sidebar from "../components/Sidebar.vue";
 import { useChatStore } from "../store/useChatStore";
 
-const { selectedUser } = useChatStore();
+const chatStore = useChatStore();
 </script>

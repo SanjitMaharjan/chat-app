@@ -6,10 +6,9 @@ import cors from 'cors';
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
-import { app,server } from "./lib/socket.js";
+import { app, server } from "./lib/socket.js";
 
 dotenv.config();
-app
 
 const PORT = process.env.PORT || 3000;
 

@@ -18,7 +18,7 @@
           :key="user.id"
           class="w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors"
           :class="{
-            'bg-base-300 ring-1 ring-base-300': user._id === chatStore.selectedUser?.id,
+            'bg-base-300 ring-1 ring-base-300': user._id === chatStore.selectedUser?._id,
           }"
           @click="chatStore.setSelectedUser(user)"
         >
@@ -32,14 +32,14 @@
               class="size-12 object-cover rounded-full"
             />
             <span
-              v-if="onlineUsers.includes(user._id)"
+              v-if="authStore.onlineUsers.includes(user._id)"
               class="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900"
             />
           </div>
           <div class="hidden lg:block text-left min-w-0">
             <div class="font-medium truncate">{{ user.fullName }}</div>
             <div class="text-sm text-zinc-400">
-              {{ onlineUsers.includes(user._id) ? "Online" : "Offline" }}
+              {{ authStore.onlineUsers.includes(user._id) ? "Online" : "Offline" }}
             </div>
           </div>
         </button>
@@ -53,11 +53,10 @@ import { onMounted } from "vue";
 import { useChatStore } from "../store/useChatStore";
 import SidebarSkeleton from "./Skeletons/SidebarSkeleton.vue";
 import { Users } from "lucide-vue-next";
+import { useAuthStore } from "../store/useAuthStore";
 
-const chatStore =
-  useChatStore();
-
-const onlineUsers = [] as any[];
+const chatStore = useChatStore();
+const authStore = useAuthStore();
 
 onMounted(async () => {
   await chatStore.getUsers();

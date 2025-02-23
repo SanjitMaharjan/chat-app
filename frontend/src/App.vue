@@ -6,7 +6,7 @@
     <Loader class="size-10 animate-spin" />
   </div>
   <template v-else>
-    <Navbar />
+    <Navbar v-if="authUser" />
     <router-view />
   </template>
 </template>

@@ -2,6 +2,10 @@ import { defineStore } from "pinia";
 import { axiosInstance } from "../lib/axios";
 import { Notify } from "../utils/Notify";
 import { useStorage } from "@vueuse/core";
+import { io, type Socket } from "socket.io-client";
+import router from "../router";
+
+const BASE_URL = "localhost:5001";
 
 export const useAuthStore = defineStore("auth", {
   state: () => {
@@ -12,6 +16,8 @@ export const useAuthStore = defineStore("auth", {
       isUpdatingProfile: false,
 
       isCheckingAuth: false,
+      onlineUsers: [] as any[],
+      socket: null as any as Socket,
     };
   },
   actions: {
@@ -20,6 +26,7 @@ export const useAuthStore = defineStore("auth", {
         this.isCheckingAuth = true;
         const res = await axiosInstance.get("/auth/check");
         this.authUser = res.data;
+        this.connectSocket();
       } catch (error) {
         console.error("Error in check auth", error);
         this.authUser = null;
@@ -37,7 +44,8 @@ export const useAuthStore = defineStore("auth", {
           type: "success",
           text: "Account created successfully",
         });
-        window.location.href = "/";
+        this.connectSocket();
+        router.push({ name: "Home" });
       } catch (error) {
         console.error("Error in sign up", error);
       } finally {
@@ -54,7 +62,8 @@ export const useAuthStore = defineStore("auth", {
           type: "success",
           text: "Logged in successfully",
         });
-        window.location.href = "/";
+        this.connectSocket();
+        router.push({ name: "Home" });
       } catch (error) {
         console.error("Error in sign up", error);
       } finally {
@@ -67,13 +76,37 @@ export const useAuthStore = defineStore("auth", {
         await axiosInstance.post("/auth/logout");
         this.authUser = null;
         Notify({ type: "success", text: "Logged out successfully" });
-        window.location.href = "/login";
+        this.disconnectSocket();
+        router.push({ name: "Login" });
       } catch (error) {
         console.error("Error in logout", error);
         Notify({
           type: "error",
           text: "Error in logout",
         });
+      }
+    },
+
+    connectSocket() {
+      if (!this.authUser || this.socket?.connected) return;
+
+      const socket = io(BASE_URL, {
+        query: {
+          userId: this.authUser._id,
+        },
+      });
+      socket.connect();
+
+      socket.on("getOnlineUsers", (onlineUserIds: any[]) => {
+        this.onlineUsers = onlineUserIds;
+      });
+
+      this.socket = socket;
+    },
+
+    disconnectSocket() {
+      if (this.socket?.connected) {
+        this.socket.disconnect();
       }
     },
   },
