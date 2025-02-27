@@ -1,7 +1,7 @@
-// Constants for key and block sizes
-const KEY_SIZE = 16; // 128-bit key
-const BLOCK_SIZE = 16; // 128-bit block
-// S-box
+
+const KEY_SIZE = 16; 
+const BLOCK_SIZE = 16; 
+
 const sbox = [
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -21,7 +21,7 @@ const sbox = [
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 ];
 
-// Inverse S-box
+
 const rsbox = [
     0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
     0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
@@ -41,13 +41,13 @@ const rsbox = [
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
 ];
 
-// Rcon
+
 const rcon = [
     0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
 ];
 
 
-// Utilities for converting between hex strings and Uint8Arrays
+
 function hexToUint8Array(hex) {
     const bytes = new Uint8Array(hex.length / 2);
     for (let i = 0; i < hex.length; i += 2) {
@@ -60,7 +60,7 @@ function uint8ArrayToHex(array) {
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-// Key expansion
+
 function keyExpansion(key) {
     const expandedKey = new Uint8Array(176);
     expandedKey.set(key);
@@ -83,7 +83,7 @@ function keyExpansion(key) {
     return expandedKey;
 }
 
-// AES core functions (AddRoundKey, SubBytes, ShiftRows, MixColumns)
+
 function addRoundKey(state, roundKey) {
     for (let i = 0; i < 16; i++) {
         state[i] ^= roundKey[i];
@@ -97,11 +97,56 @@ function subBytes(state) {
 }
 
 function shiftRows(state) {
-    // ...
+
+    let temp = state[1];
+    state[1] = state[5];
+    state[5] = state[9];
+    state[9] = state[13];
+    state[13] = temp;
+
+
+    temp = state[2];
+    state[2] = state[10];
+    state[10] = temp;
+    temp = state[6];
+    state[6] = state[14];
+    state[14] = temp;
+
+
+    temp = state[15];
+    state[15] = state[11];
+    state[11] = state[7];
+    state[7] = state[3];
+    state[3] = temp;
 }
 
 function mixColumns(state) {
-    // ...
+    for (let i = 0; i < 16; i += 4) {
+        const s0 = state[i];
+        const s1 = state[i + 1];
+        const s2 = state[i + 2];
+        const s3 = state[i + 3];
+
+        state[i] = multiply(0x02, s0) ^ multiply(0x03, s1) ^ s2 ^ s3;
+        state[i + 1] = s0 ^ multiply(0x02, s1) ^ multiply(0x03, s2) ^ s3;
+        state[i + 2] = s0 ^ s1 ^ multiply(0x02, s2) ^ multiply(0x03, s3);
+        state[i + 3] = multiply(0x03, s0) ^ s1 ^ s2 ^ multiply(0x02, s3);
+    }
+}
+
+function multiply(a, b) {
+    let result = 0;
+    while (b > 0) {
+        if (b & 1) {
+            result ^= a;
+        }
+        a = a << 1;
+        if (a & 0x100) {
+            a ^= 0x11b;
+        }
+        b = b >> 1;
+    }
+    return result;
 }
 
 function invSubBytes(state) {
@@ -111,14 +156,43 @@ function invSubBytes(state) {
 }
 
 function invShiftRows(state) {
-    // ...
-}
 
+    let temp = state[13];
+    state[13] = state[9];
+    state[9] = state[5];
+    state[5] = state[1];
+    state[1] = temp;
+
+
+    temp = state[2];
+    state[2] = state[10];
+    state[10] = temp;
+    temp = state[6];
+    state[6] = state[14];
+    state[14] = temp;
+
+
+    temp = state[3];
+    state[3] = state[7];
+    state[7] = state[11];
+    state[11] = state[15];
+    state[15] = temp;
+}
 function invMixColumns(state) {
-    // ...
+    for (let i = 0; i < 16; i += 4) {
+        const s0 = state[i];
+        const s1 = state[i + 1];
+        const s2 = state[i + 2];
+        const s3 = state[i + 3];
+
+        state[i] = multiply(0x0e, s0) ^ multiply(0x0b, s1) ^ multiply(0x0d, s2) ^ multiply(0x09, s3);
+        state[i + 1] = multiply(0x09, s0) ^ multiply(0x0e, s1) ^ multiply(0x0b, s2) ^ multiply(0x0d, s3);
+        state[i + 2] = multiply(0x0d, s0) ^ multiply(0x09, s1) ^ multiply(0x0e, s2) ^ multiply(0x0b, s3);
+        state[i + 3] = multiply(0x0b, s0) ^ multiply(0x0d, s1) ^ multiply(0x09, s2) ^ multiply(0x0e, s3);
+    }
 }
 
-// AES encryption
+
 function aesEncryptBlock(input, key) {
     const state = new Uint8Array(input);
     const expandedKey = keyExpansion(key);
@@ -139,7 +213,7 @@ function aesEncryptBlock(input, key) {
     return state;
 }
 
-// AES decryption
+
 function aesDecryptBlock(input, key) {
     const state = new Uint8Array(input);
     const expandedKey = keyExpansion(key);
@@ -160,7 +234,7 @@ function aesDecryptBlock(input, key) {
     return state;
 }
 
-// AES-128 CBC mode encryption
+
 function aesCbcEncrypt(key, iv, plaintext) {
     const ciphertext = new Uint8Array(plaintext.length);
     let previousBlock = iv;
@@ -178,7 +252,7 @@ function aesCbcEncrypt(key, iv, plaintext) {
     return ciphertext;
 }
 
-// AES-128 CBC mode decryption
+
 function aesCbcDecrypt(key, iv, ciphertext) {
     const plaintext = new Uint8Array(ciphertext.length);
     let previousBlock = iv;
@@ -196,14 +270,24 @@ function aesCbcDecrypt(key, iv, ciphertext) {
     return plaintext;
 }
 
-// Example usage
+
 const key = hexToUint8Array('000102030405060708090a0b0c0d0e0f');
 const iv = hexToUint8Array('101112131415161718191a1b1c1d1e1f');
 
+function pad(data) {
+    const paddingLength = 16 - (data.length % 16);
+    const padding = new Uint8Array(paddingLength).fill(paddingLength);
+    return new Uint8Array([...data, ...padding]);
+}
+
+function unpad(data) {
+    const paddingLength = data[data.length - 1];
+    return data.slice(0, data.length - paddingLength);
+}
+
 function encrypt(rawText) {
     const plaintext = new TextEncoder().encode(rawText);
-    const paddedPlaintext = new Uint8Array(Math.ceil(plaintext.length / 16) * 16);
-    paddedPlaintext.set(plaintext);
+    const paddedPlaintext = pad(plaintext);
     const encrypted = aesCbcEncrypt(key, iv, paddedPlaintext);
     return uint8ArrayToHex(encrypted);
 }
@@ -211,7 +295,8 @@ function encrypt(rawText) {
 function decrypt(hexCiphertext) {
     const ciphertext = hexToUint8Array(hexCiphertext);
     const decrypted = aesCbcDecrypt(key, iv, ciphertext);
-    return new TextDecoder().decode(decrypted).replace(/\0+$/, '');
+    const unpadded = unpad(decrypted);
+    return new TextDecoder().decode(unpadded);
 }
 
 export {

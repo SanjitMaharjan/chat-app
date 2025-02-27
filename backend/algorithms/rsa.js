@@ -1,4 +1,4 @@
-// Utility functions for BigInt operations
+
 function modExp(base, exp, mod) {
     let result = 1n;
     base = base % mod;
@@ -42,9 +42,9 @@ function modInverse(a, m) {
     return x1;
 }
 
-// Function to generate RSA keys
+
 function generateRSAKeys(bitLength) {
-    const e = 65537n; // Public exponent
+    const e = 65537n;
     let p, q, n, phi, d;
 
     do {
@@ -62,7 +62,7 @@ function generateRSAKeys(bitLength) {
     };
 }
 
-// Function to generate a random prime number of a given bit length
+
 function generatePrime(bitLength) {
     while (true) {
         const candidate = randomBigInt(bitLength);
@@ -70,15 +70,15 @@ function generatePrime(bitLength) {
     }
 }
 
-// Utility function to generate a random BigInt of a given bit length
+
 function randomBigInt(bitLength) {
     let rnd = BigInt('0b' + Array(bitLength).fill().map(() => Math.random() < 0.5 ? '0' : '1').join(''));
-    rnd |= 1n << BigInt(bitLength - 1); // Ensure the most significant bit is set
-    rnd |= 1n; // Ensure the number is odd
+    rnd |= 1n << BigInt(bitLength - 1);
+    rnd |= 1n;
     return rnd;
 }
 
-// Function to check if a number is prime (Miller-Rabin primality test)
+
 function isPrime(n, k = 5) {
     if (n === 2n || n === 3n) return true;
     if (n <= 1n || n % 2n === 0n) return false;
@@ -106,7 +106,7 @@ function isPrime(n, k = 5) {
     return true;
 }
 
-// RSA encryption
+
 function rsaEncrypt(message, publicKey) {
     const m = BigInt('0x' + Buffer.from(message).toString('hex'));
     const { e, n } = publicKey;
@@ -114,7 +114,7 @@ function rsaEncrypt(message, publicKey) {
     return c.toString(16);
 }
 
-// RSA decryption
+
 function rsaDecrypt(ciphertext, privateKey) {
     const c = BigInt('0x' + ciphertext);
     const { d, n } = privateKey;
@@ -122,8 +122,6 @@ function rsaDecrypt(ciphertext, privateKey) {
     return Buffer.from(m.toString(16), 'hex').toString();
 }
 
-// Example usage
-// const { publicKey, privateKey } = generateRSAKeys(1024);
 
 const publicKey = {
     e: 65537n,

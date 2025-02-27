@@ -1,6 +1,6 @@
-// Constants for key and nonce sizes
-const KEY_SIZE = 32; // 256-bit key
-const NONCE_SIZE = 12; // 96-bit nonce
+
+const KEY_SIZE = 32;
+const NONCE_SIZE = 12;
 
 const SIGMA = new Uint8Array([
     101, 120, 112, 97, 110, 100, 32, 51, 50, 45, 98, 121, 116, 101, 32, 107
@@ -60,11 +60,11 @@ function chacha20Encrypt(key, nonce, plaintext) {
 }
 
 function chacha20Decrypt(key, nonce, ciphertext) {
-    // Decryption is symmetric to encryption in ChaCha20
+
     return chacha20Encrypt(key, nonce, ciphertext);
 }
 
-// Utilities for converting between hex strings and Uint8Arrays
+
 function hexToUint8Array(hex) {
     const bytes = new Uint8Array(hex.length / 2);
     for (let i = 0; i < hex.length; i += 2) {
@@ -77,7 +77,7 @@ function uint8ArrayToHex(array) {
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-// Example usage
+
 const key = hexToUint8Array('000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f');
 const nonce = hexToUint8Array('000000000000004a00000000');
 
@@ -93,7 +93,7 @@ function decrypt(hexCiphertext) {
     return new TextDecoder().decode(decrypted);
 }
 
-// module.exports = { encrypt, decrypt, hexToUint8Array, uint8ArrayToHex };
+
 export {
     encrypt, decrypt, hexToUint8Array, uint8ArrayToHex
 }
