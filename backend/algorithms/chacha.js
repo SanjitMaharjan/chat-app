@@ -79,7 +79,7 @@ function uint8ArrayToHex(array) {
 
 
 const key = hexToUint8Array('000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f');
-const nonce = hexToUint8Array('000000000000004a00000000');
+const nonce = hexToUint8Array('00a560000000004a0000045670000000');
 
 function encrypt(rawText) {
     const plaintext = new TextEncoder().encode(rawText);
